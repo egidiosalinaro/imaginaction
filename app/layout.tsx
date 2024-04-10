@@ -11,7 +11,7 @@ const IBMPlex = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "ImaginAction",
+  title: "ImageInAction",
   description: "Leverage the impact of your photos using AI",
 };
 
