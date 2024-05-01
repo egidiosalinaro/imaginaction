@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import {
   Select,
@@ -10,9 +10,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,16 +21,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   aspectRatioOptions,
   defaultValues,
   transformationTypes,
-} from "@/constants";
-import { CustomField } from "./CustomField";
-import { useState } from "react";
-import { AspectRatioKey } from "@/lib/utils";
+} from '@/constants';
+import { CustomField } from './CustomField';
+import { useState } from 'react';
+import { AspectRatioKey } from '@/lib/utils';
 
 export const formSchema = z.object({
   title: z.string(),
@@ -46,14 +46,18 @@ const TransformationForm = ({
   userId,
   type,
   creditBalance,
+  config = null,
 }: TransformationFormProps) => {
   const transformationType = transformationTypes[type];
   const [image, setImage] = useState(data);
   const [newTransformation, setNewTransformation] =
     useState<Transformations | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTransforming, setIsTransforming] = useState(false);
+  const [transformationConfig, setTransformationConfig] = useState(config);
 
   const initialValues =
-    data && action === "Update"
+    data && action === 'Update'
       ? {
           title: data?.title,
           aspectRatio: data?.aspectRatio,
@@ -86,35 +90,37 @@ const TransformationForm = ({
     onChangeField: (value: string) => void
   ) => {};
 
+  const onTransformHandler = () => {};
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
         <CustomField
           control={form.control}
-          name="title"
-          formLabel="Image Title"
-          className="w-full"
-          render={({ field }) => <Input {...field} className="input-field" />}
+          name='title'
+          formLabel='Image Title'
+          className='w-full'
+          render={({ field }) => <Input {...field} className='input-field' />}
         />
 
-        {type === "fill" && (
+        {type === 'fill' && (
           <CustomField
             control={form.control}
-            name="aspectRatio"
-            formLabel="Aspect Ratio"
-            className="w-full"
+            name='aspectRatio'
+            formLabel='Aspect Ratio'
+            className='w-full'
             render={({ field }) => (
               <Select
                 onValueChange={(value) =>
                   onSelectFieldHandler(value, field.onChange)
                 }
               >
-                <SelectTrigger className="select-field">
-                  <SelectValue placeholder="Select size" />
+                <SelectTrigger className='select-field'>
+                  <SelectValue placeholder='Select size' />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.keys(aspectRatioOptions).map((key) => (
-                    <SelectItem key={key} value={key} className="select-item">
+                    <SelectItem key={key} value={key} className='select-item'>
                       {aspectRatioOptions[key as AspectRatioKey].label}
                     </SelectItem>
                   ))}
@@ -124,22 +130,22 @@ const TransformationForm = ({
           />
         )}
 
-        {(type === "remove" || type === "recolor") && (
-          <div className="prompt-field">
+        {(type === 'remove' || type === 'recolor') && (
+          <div className='prompt-field'>
             <CustomField
               control={form.control}
-              name="prompt"
+              name='prompt'
               formLabel={
-                type === "remove" ? "Object to remove" : "Object to recolor"
+                type === 'remove' ? 'Object to remove' : 'Object to recolor'
               }
-              className="w-full"
+              className='w-full'
               render={({ field }) => (
                 <Input
                   value={field.value}
-                  className="input-field"
+                  className='input-field'
                   onChange={(e) =>
                     onInputChangeHandler(
-                      "prompt",
+                      'prompt',
                       e.target.value,
                       type,
                       field.onChange
@@ -148,8 +154,49 @@ const TransformationForm = ({
                 />
               )}
             />
+
+            {type === 'recolor' && (
+              <CustomField
+                control={form.control}
+                name='color'
+                formLabel='Replacement Color'
+                className='w-full'
+                render={({ field }) => (
+                  <Input
+                    value={field.value}
+                    className='input-field'
+                    onChange={(e) =>
+                      onInputChangeHandler(
+                        'color',
+                        e.target.value,
+                        'recolor',
+                        field.onChange
+                      )
+                    }
+                  />
+                )}
+              />
+            )}
           </div>
         )}
+
+        <div className='flex flex-col gap-4'>
+          <Button
+            type='button'
+            className='submit-button capitalize'
+            disabled={isTransforming || newTransformation === null}
+            onClick={onTransformHandler}
+          >
+            {isTransforming ? 'Transforming...' : 'Apply Transformation'}
+          </Button>
+          <Button
+            type='submit'
+            className='submit-button capitalize'
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Save Image'}
+          </Button>
+        </div>
       </form>
     </Form>
   );
