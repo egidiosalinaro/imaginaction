@@ -30,7 +30,7 @@ import {
 } from '@/constants';
 import { CustomField } from './CustomField';
 import { useState } from 'react';
-import { AspectRatioKey } from '@/lib/utils';
+import { AspectRatioKey, debounce } from '@/lib/utils';
 
 export const formSchema = z.object({
   title: z.string(),
@@ -81,14 +81,39 @@ const TransformationForm = ({
   const onSelectFieldHandler = (
     value: string,
     onChangeField: (value: string) => void
-  ) => {};
+  ) => {
+    const imageSize = aspectRatioOptions[value as AspectRatioKey];
+
+    setImage((prevState: any) => ({
+      ...prevState,
+      aspectRatio: imageSize.aspectRatio,
+      width: imageSize.width,
+      height: imageSize.height,
+    }));
+
+    setNewTransformation(transformationType.config);
+
+    return onChangeField(value);
+  };
 
   const onInputChangeHandler = (
     fieldName: string,
     value: string,
     type: string,
     onChangeField: (value: string) => void
-  ) => {};
+  ) => {
+    debounce(() => {
+      setNewTransformation((prevState: any) => ({
+        ...prevState,
+        [type]: {
+          ...prevState?.[type],
+          [fieldName === 'prompt' ? 'prompt' : 'to']: value,
+        },
+      }));
+
+      return onChangeField(value);
+    }, 1000);
+  };
 
   const onTransformHandler = () => {};
 
